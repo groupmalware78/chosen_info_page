@@ -13,7 +13,8 @@
     "dev:web": "vite",
     "build": "vite build",
     "start": "NODE_ENV=production node --env-file-if-exists=.env server/index.js",
-    "reset-admin": "node --env-file-if-exists=.env server/reset-admin.js"
+    "reset-admin": "node --env-file-if-exists=.env server/reset-admin.js",
+    "deploy": "bash scripts/deploy-railway.sh"
   },
   "dependencies": {
     "compression": "^1.8.2",

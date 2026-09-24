@@ -42,6 +42,25 @@ docker run -d -p 3000:3000 -v chosen-data:/data \
   -e ADMIN_PASSWORD='choose-a-strong-one' -e TRUST_PROXY=1 chosen-logistics
 ```
 
+### Railway
+
+```bash
+npm run deploy
+```
+
+`scripts/deploy-railway.sh` uses the Railway CLI (`brew install railway`) and can be re-run safely. On the first run it:
+
+1. logs you in and creates (or links) a Railway project and a `web` service
+2. attaches a **persistent volume at `/data`** for the database and uploads (without it, content is wiped on every deploy)
+3. sets `NODE_ENV`, `DATA_DIR`, `TRUST_PROXY` and `ADMIN_EMAIL`, and generates `ADMIN_PASSWORD` if you didn't provide one
+4. builds with the `Dockerfile` (see `railway.json`), deploys and waits on the `/healthz` health check
+5. generates a public `*.up.railway.app` domain and prints the site URL and first-time admin login
+
+Options: `RAILWAY_SERVICE`, `RAILWAY_PROJECT`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CUSTOM_DOMAIN`, for example:
+`ADMIN_EMAIL=you@company.com CUSTOM_DOMAIN=www.chosenlogistics.com npm run deploy`.
+
+For email notifications, add the `SMTP_*` variables in the Railway dashboard (Service → Variables).
+
 ### Deployment checklist
 
 - Serve over **HTTPS**. Session cookies are `Secure` in production.
