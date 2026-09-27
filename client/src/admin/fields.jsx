@@ -35,6 +35,25 @@ export function TextInput({ value, onChange, multiline, rows = 4, ...props }) {
   return <Tag className="a-input" value={value ?? ''} onChange={(e) => onChange(e.target.value)} rows={multiline ? rows : undefined} {...props} />;
 }
 
+export function PasswordInput(props) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="a-password">
+      <TextInput {...props} type={visible ? 'text' : 'password'} />
+      <button
+        type="button"
+        className="a-icon-btn"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? 'Hide password' : 'Show password'}
+        aria-pressed={visible}
+        title={visible ? 'Hide password' : 'Show password'}
+      >
+        <AIcon name={visible ? 'eyeOff' : 'eye'} size={18} />
+      </button>
+    </div>
+  );
+}
+
 export function Toggle({ checked, onChange, label }) {
   return (
     <label className="a-toggle">

@@ -481,6 +481,26 @@ textarea.a-input {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--a-primary) 20%, transparent);
 }
 
+.a-password {
+  position: relative;
+}
+
+.a-password .a-input {
+  padding-right: 44px;
+}
+
+.a-password .a-icon-btn {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+}
+
+/* Hide the browser's own reveal button so there is only one toggle. */
+.a-password input::-ms-reveal {
+  display: none;
+}
+
 .has-error .a-input {
   border-color: var(--a-danger);
 }

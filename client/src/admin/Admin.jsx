@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../lib/api.js';
 import { navigate, usePath } from '../lib/router.js';
 import { AIcon } from './AIcon.jsx';
-import { AdminContext, Field, TextInput } from './fields.jsx';
+import { AdminContext, Field, PasswordInput, TextInput } from './fields.jsx';
 import { collections, contactSectionFields, pages, sectionsPage } from './schema.js';
 import { ContentEditor, PageHead, SectionSettings } from './ContentEditor.jsx';
 import { CollectionEditor } from './CollectionEditor.jsx';
@@ -83,7 +83,7 @@ function Login({ onLogin }) {
             <TextInput id="l-email" type="email" autoComplete="username" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required autoFocus />
           </Field>
           <Field label="Password" htmlFor="l-pass">
-            <TextInput id="l-pass" type="password" autoComplete="current-password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} required />
+            <PasswordInput id="l-pass" autoComplete="current-password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} required />
           </Field>
           {error && (
             <p className="a-alert" role="alert">
