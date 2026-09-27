@@ -10,7 +10,7 @@ A one-page website for a co-loading / freight consolidation business, with a bui
 
 - **Frontend:** React 19 + Vite. No UI framework. Theme is applied through CSS variables.
 - **Backend:** Express 5 on Node's built-in SQLite (`node:sqlite`). No native modules to compile.
-- **Security:** scrypt password hashing; HttpOnly `SameSite=Strict` session cookies (stored hashed); CSRF header check; Helmet CSP; rate-limited login and contact form; zod validation on every write; link and image URL allow-lists; uploaded images verified by file signature (SVG blocked); contact-form honeypot; CSV export protected against formula injection.
+- **Security:** scrypt password hashing; HttpOnly `SameSite=Strict` session cookies (stored hashed); CSRF header check; Helmet CSP; rate-limited API, login and contact form; 15-minute idle timeout on admin sessions; zod validation on every write; link and image URL allow-lists; uploaded images verified by file signature (SVG blocked); contact-form honeypot; CSV export protected against formula injection.
 
 Requires **Node.js 22.13 or newer** (24 LTS recommended).
 
@@ -59,14 +59,14 @@ npm run deploy
 Options: `RAILWAY_SERVICE`, `RAILWAY_PROJECT`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CUSTOM_DOMAIN`, for example:
 `ADMIN_EMAIL=you@company.com CUSTOM_DOMAIN=www.chosenlogistics.com npm run deploy`.
 
-For email notifications, add the `SMTP_*` variables in the Railway dashboard (Service → Variables).
+For email notifications, add `RESEND_API_KEY` (and optionally `CONTACT_FROM` / `CONTACT_NOTIFY_TO`) in the Railway dashboard (Service → Variables).
 
 ### Deployment checklist
 
 - Serve over **HTTPS**. Session cookies are `Secure` in production.
 - Set `TRUST_PROXY=1` when running behind nginx or a PaaS load balancer.
 - Keep `DATA_DIR` on persistent storage and **back it up**. It holds `chosen.db` and `uploads/`.
-- Set SMTP variables if you want an email for each new enquiry. Enquiries are always saved in the admin.
+- Set `RESEND_API_KEY` if you want an email for each new enquiry. Enquiries are always saved in the admin.
 - Replace the sample content: rates, phone number, address and legal text are placeholders. **Have the Terms and Privacy Policy reviewed for your jurisdiction.**
 - Health check: `GET /healthz`.
 

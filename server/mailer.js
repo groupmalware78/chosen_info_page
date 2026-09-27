@@ -1,20 +1,11 @@
-import nodemailer from 'nodemailer';
 import { config } from './config.js';
 
-const { smtp } = config;
-const transport = smtp.host
-  ? nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: smtp.user ? { user: smtp.user, pass: smtp.pass } : undefined,
-    })
-  : null;
+const { mail } = config;
 
-/** Emails a new enquiry to the office. No-op when SMTP is not configured. */
+/** Emails a new enquiry to the office via Resend. No-op when RESEND_API_KEY is not set. */
 export async function notifyNewMessage(msg, fallbackTo) {
-  const to = smtp.notifyTo || fallbackTo;
-  if (!transport || !to) return;
+  const to = mail.notifyTo || fallbackTo;
+  if (!mail.resendApiKey || !to) return;
   const lines = [
     `Name: ${msg.name}`,
     `Email: ${msg.email}`,
@@ -25,13 +16,19 @@ export async function notifyNewMessage(msg, fallbackTo) {
     msg.message,
   ].filter((l) => l !== false && l !== '');
   try {
-    await transport.sendMail({
-      from: smtp.from || smtp.user,
-      to,
-      replyTo: msg.email,
-      subject: `New website enquiry from ${msg.name.replace(/[\r\n]/g, ' ')}`,
-      text: lines.join('\n'),
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${mail.resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: mail.from,
+        to: [to],
+        reply_to: msg.email,
+        subject: `New website enquiry from ${msg.name.replace(/[\r\n]/g, ' ')}`,
+        text: lines.join('\n'),
+      }),
+      signal: AbortSignal.timeout(10_000),
     });
+    if (!res.ok) throw new Error(`Resend responded ${res.status}: ${await res.text()}`);
   } catch (err) {
     console.error('[mailer] Failed to send enquiry notification:', err.message);
   }

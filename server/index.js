@@ -4,6 +4,7 @@ import express from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { db } from './db.js';
 import { seed } from './seed.js';
@@ -51,6 +52,16 @@ app.get('/healthz', (req, res) => {
   res.json({ ok: true });
 });
 
+app.use(
+  '/api',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: config.apiRateLimit,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { error: 'Too many requests. Please slow down and try again shortly.' },
+  }),
+);
 app.use('/api', publicRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));

@@ -30,17 +30,22 @@ export function authenticate(email, password) {
 
 const sha256 = (v) => crypto.createHash('sha256').update(v).digest('hex');
 
-export function createSession(res, userId) {
-  const token = crypto.randomBytes(32).toString('base64url');
-  const maxAge = config.sessionDays * 24 * 60 * 60 * 1000;
-  db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(sha256(token), userId, Date.now() + maxAge);
+const idleMs = () => config.sessionIdleMinutes * 60 * 1000;
+
+function setSessionCookie(res, token) {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: config.cookieSecure,
     sameSite: 'strict',
     path: '/api',
-    maxAge,
+    maxAge: idleMs(),
   });
+}
+
+export function createSession(res, userId) {
+  const token = crypto.randomBytes(32).toString('base64url');
+  db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(sha256(token), userId, Date.now() + idleMs());
+  setSessionCookie(res, token);
 }
 
 export function destroySession(req, res) {
@@ -58,7 +63,7 @@ export function purgeExpiredSessions() {
   db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now());
 }
 
-/** Rejects requests without a valid session. */
+/** Rejects requests without a valid session; activity pushes the idle expiry forward. */
 export function requireAuth(req, res, next) {
   const token = req.cookies?.[SESSION_COOKIE];
   if (!token) return res.status(401).json({ error: 'Not signed in' });
@@ -68,6 +73,8 @@ export function requireAuth(req, res, next) {
     )
     .get(sha256(token));
   if (!row || row.expires_at < Date.now()) return res.status(401).json({ error: 'Session expired' });
+  db.prepare('UPDATE sessions SET expires_at = ? WHERE token_hash = ?').run(Date.now() + idleMs(), sha256(token));
+  setSessionCookie(res, token);
   req.user = { id: row.id, email: row.email };
   next();
 }

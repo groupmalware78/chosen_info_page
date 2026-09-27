@@ -14,16 +14,15 @@ export const config = {
   // Set TRUST_PROXY=1 when running behind a reverse proxy (nginx, Render, Fly, etc.)
   trustProxy: process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY : false,
   cookieSecure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : isProd,
-  sessionDays: Number(process.env.SESSION_DAYS) || 7,
+  // Admin sessions expire after this many minutes without activity.
+  sessionIdleMinutes: Number(process.env.SESSION_IDLE_MINUTES) || 15,
   adminEmail: process.env.ADMIN_EMAIL || 'admin@chosenlogistics.com',
   adminPassword: process.env.ADMIN_PASSWORD || '',
-  smtp: {
-    host: process.env.SMTP_HOST || '',
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-    from: process.env.SMTP_FROM || '',
+  mail: {
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    from: process.env.CONTACT_FROM || 'Chosen Logistics Website <no-reply@chosenlogistics.com>',
     notifyTo: process.env.CONTACT_NOTIFY_TO || '',
   },
+  // Overall per-IP request budget for /api, on top of the stricter login and contact limits.
+  apiRateLimit: Number(process.env.API_RATE_LIMIT) || 300,
 };
